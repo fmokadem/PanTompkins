@@ -47,23 +47,10 @@ The main script is `pt.py`.
 
 ## Example Plot
 
-(The generated plot shows the signal at various processing stages and the final detected QRS peaks marked on the raw ECG signal)
-
-```
-[ QRS_offline_detector_plot_2018_05_17_23_18_43.png ]
-
-Example: ![Example QRS Detection Plot](qrs_output/QRS_offline_detector_plot_YYYY_MM_DD_HH_MM_SS.png)
-```
-
+![alt text](https://github.com/fmokadem/PanTompkins/blob/main/QRS_offline_detector_plot_2018_05_17_23_18_43.png)
 ## Dependencies
 
 - Python 3.x
-- NumPy (`pip install numpy`)
-- Matplotlib (`pip install matplotlib`)
-- SciPy (`pip install scipy`)
-
-## Notes
-
-- This implementation is intended for educational and research purposes.
-- The mapping of detected peak indices (from the integrated signal) back to the raw signal time includes some latency due to filtering and integration. More precise mapping would require calculating group delays.
-- The implementation includes basic adaptive thresholding but omits the more complex search-back procedure with a second threshold, which is part of the full Pan-Tompkins algorithm for detecting potentially missed beats.
+- NumPy
+- Matplotlib
+- SciPy
