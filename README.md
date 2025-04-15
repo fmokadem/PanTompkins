@@ -50,7 +50,7 @@ The main script is `pt.py`.
 (The generated plot shows the signal at various processing stages and the final detected QRS peaks marked on the raw ECG signal)
 
 ```
-[ Placeholder: Add an example qrs_output/*.png image here if available ]
+[ QRS_offline_detector_plot_2018_05_17_23_18_43.png ]
 
 Example: ![Example QRS Detection Plot](qrs_output/QRS_offline_detector_plot_YYYY_MM_DD_HH_MM_SS.png)
 ```
