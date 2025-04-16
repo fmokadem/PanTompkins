@@ -1,69 +1,64 @@
-# PanTompkins ECG QRS Detector
+# Pan-Tompkins QRS Detector (Offline)
 
-This repository contains a Python implementation of the Pan-Tompkins algorithm for detecting QRS complexes in ECG signals.
-The code can process ECG data from both CSV and WAV files.
+This repository contains a Python implementation of the Pan-Tompkins algorithm for offline QRS complex detection in ECG signals.
 
-## Features
+## Structure
 
-- Implements the core steps of the Pan-Tompkins algorithm:
-    - Bandpass Filtering
-    - Differentiation
-    - Squaring
-    - Moving Window Integration
-    - Adaptive Thresholding for QRS detection
-- Supports loading data from:
-    - CSV files (requires specifying signal frequency, format: `timestamp,value`)
-    - Uncompressed WAV files (signal frequency read from header)
-- Generates optional outputs:
-    - Log file (.csv) containing timestamps, raw ECG values, and QRS detection flags (0 or 1).
-    - Plot (.png) visualizing the different stages of the algorithm and the final QRS detections.
-- Configurable parameters for filtering, window sizes, and detection thresholds.
+*   `run_detector.py`: The main script to run the detector from the command line.
+*   `PanTompkins/pt.py`: Contains the `QRSDetectorOffline` class implementing the core algorithm logic (filtering, differentiation, squaring, integration, adaptive thresholding).
+*   `PanTompkins/utils/io_utils.py`: Utility functions for loading ECG data from `.csv` and `.wav` files.
+*   `PanTompkins/utils/output_utils.py`: Utility function for formatting the output data.
+*   `PanTompkins/utils/plotting.py`: Utility function for generating plots of the detection steps.
+*   `PanTompkins/_findpeaks.py`: A simplified peak detection function.
+*   `qrs_output/`: Default directory where output plots are saved (created automatically).
+*   `PanTompkins/sig100.wav`: Example WAV file for testing (located inside the package directory).
 
-## Usage
+## Algorithm Steps
 
-The main script is `pt.py`.
+1.  **Load Data**: Reads ECG data from a specified `.csv` or `.wav` file.
+2.  **Bandpass Filter**: Filters the signal to isolate frequencies relevant to the QRS complex (default 0-15 Hz).
+3.  **Differentiate**: Calculates the signal's derivative to highlight sharp slopes.
+4.  **Square**: Squares the differentiated signal to enhance high-frequency components and make values positive.
+5.  **Moving Window Integration**: Averages the squared signal over a time window to create a feature signal where QRS complexes appear as peaks.
+6.  **Peak Detection**: Identifies initial potential peaks in the integrated signal.
+7.  **Adaptive Thresholding**: Classifies peaks as QRS or noise using adaptive thresholds based on running estimates of signal and noise peak amplitudes.
+8.  **Output**: (Optional) Generates a plot showing the signal at various processing stages and marking the detected QRS complexes.
 
-1.  **Prepare your ECG data:**
-    *   **CSV:** Ensure your file has at least two columns, typically `timestamp,ecg_value`. A header row is expected and skipped.
-    *   **WAV:** Use standard, uncompressed WAV files.
+The script is run from the command line using `run_detector.py`.
 
-2.  **Modify `pt.py` (if needed):**
-    *   Locate the `if __name__ == '__main__':` block at the end of the script.
-    *   Update the `input_file` variable to the path of your ECG data file (`.csv` or `.wav`).
-    *   If using a CSV file, set the `input_freq` variable to the correct signal sampling frequency (in Hz).
-    *   If using a WAV file, you can set `input_freq = None` to automatically detect the frequency from the WAV header.
-    *   Adjust `output_dir`, `log_data`, `plot_data`, `show_plot` as desired.
-    *   You can also adjust algorithm parameters (filter cutoffs, window sizes, etc.) when creating the `QRSDetectorOffline` instance if the defaults are not suitable.
-
-3.  **Run the script:**
-    ```bash
-    python pt.py
-    ```
-
-4.  **Check the output:**
-    *   Detection results (peak indices, RR intervals, heart rate) will be printed to the console.
-    *   If `log_data=True`, a CSV log file will be created in the specified `output_dir`.
-    *   If `plot_data=True`, a PNG plot file will be created in the specified `output_dir`.
-
-## Example Plot
-
-(The generated plot shows the signal at various processing stages and the final detected QRS peaks marked on the raw ECG signal)
-
+```bash
+python run_detector.py --input-file <path_to_ecg_file> [options]
 ```
-[ Placeholder: Add an example qrs_output/*.png image here if available ]
 
-Example: ![Example QRS Detection Plot](qrs_output/QRS_offline_detector_plot_YYYY_MM_DD_HH_MM_SS.png)
+**Required Arguments:**
+
+*   `--input-file <path_to_ecg_file>`: Path to the input ECG file (must be `.csv` or `.wav`).
+
+**Optional Arguments:**
+
+*   `--frequency <Hz>`: Signal frequency in Hz. **Required if using a `.csv` file.** If using a `.wav` file, the frequency is read from the file header by default, but this argument can override it (a warning will be shown if they differ).
+*   `--plot`: Generate and save a plot showing the detection steps in the `--output-dir`.
+*   `--show-plot`: Display the generated plot interactively (requires a graphical backend).
+*   `--output-dir <directory>`: Directory to save the output plot (default: `./qrs_output/`).
+*   *(Advanced)*: You can add more command-line arguments to control algorithm parameters like filter cutoffs, window sizes, etc., by modifying the `argparse` section in `run_detector.py`.
+
+**Example (using the provided WAV file and generating a plot):**
+
+```bash
+python run_detector.py --input-file PanTompkins/sig100.wav --plot --output-dir qrs_output
 ```
 
 ## Dependencies
 
-- Python 3.x
-- NumPy (`pip install numpy`)
-- Matplotlib (`pip install matplotlib`)
-- SciPy (`pip install scipy`)
+*   NumPy
+*   SciPy
+*   Matplotlib (only if plotting)
 
-## Notes
+Install dependencies using pip:
+```bash
+pip install numpy scipy matplotlib
+```
 
-- This implementation is intended for educational and research purposes.
-- The mapping of detected peak indices (from the integrated signal) back to the raw signal time includes some latency due to filtering and integration. More precise mapping would require calculating group delays.
-- The implementation includes basic adaptive thresholding but omits the more complex search-back procedure with a second threshold, which is part of the full Pan-Tompkins algorithm for detecting potentially missed beats.
+## Reference
+
+Pan, J., & Tompkins, W. J. (1985). A real-time QRS detection algorithm. *IEEE Transactions on Biomedical Engineering*, BME-32(3), 230–236. 
